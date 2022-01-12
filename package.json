@@ -2,9 +2,9 @@
   "name": "knowledge-graph-search",
   "version": "1.0.0",
   "description": "Web app to make the Knowledge Graph simpler to search",
-  "main": "main.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/alphagov/knowledge-graph-search#readme",
   "dependencies": {
+    "express": "^4.17.2",
     "govuk-frontend": "^3.14.0"
   }
 }
