@@ -61,7 +61,7 @@ const view = function() {
                   <option name="and" ${state.combinator === 'and' ? 'selected' : ''}>all of</option>
                   <option name="or" ${state.combinator === 'or' ? 'selected' : ''}>any of</option>
                 </select>
-                <input class="govuk-input" id="keyword" placeholder="eg: cat dog &quot;health certificate&quot;" value='${sanitise(state.selectedWords).replace('"', '&quot;')}'/><br/>
+                <input class="govuk-input" id="keyword" placeholder="eg: cat dog &quot;health certificate&quot;" value='${sanitise(state.selectedWords).replace('"', '&quot;')}'/>
                 Exclude: ${viewTooltip('Keywords you want to exclude from your search')}
                 <input class="govuk-input" id="excluded-keyword" placeholder="leave blank if no exclusions" value='${sanitise(state.excludedWords).replace('"', '&quot;')}'/>
               </div>
@@ -121,6 +121,7 @@ const view = function() {
                 Taxon: ${viewTooltip('Limit this search to a taxon (and its sub-taxons)')}
                 <div id="taxon"></div>
               </div>
+              ${viewLocaleSelector()}
               <p class="govuk-body">
                 <button
                     class="govuk-button ${state.waiting?'govuk-button--secondary':''}"
@@ -235,6 +236,18 @@ const view = function() {
     });
   }
 };
+
+
+const viewLocaleSelector = function() {
+  const html = [`
+    <div class="govuk-body taxon-facet">
+      Language: ${viewTooltip('Limit results to the specified language')}
+      <select id="locale" class="govuk-select">
+  `];
+  html.push(...state.locales.map(code => `<option name="${code}" ${state.selectedLocale==code ? 'selected' : ''}>${localeNames[code]}</option>`))
+  html.push('</select></div>');
+  return html.join('');
+}
 
 
 const viewSearchResultsTable = function(records, showFields) {
@@ -427,5 +440,136 @@ const fieldFormat = function(key, val) {
   return (f && f.format) ? f.format(val) : val;
 }
 
+// IETF
+const localeNames = {
+  '': 'All languages',
+  'af': 'Afrikaans',
+  'am': 'Amharic',
+  'ar': 'Arabic',
+  'arn': 'Mapudungun',
+  'as': 'Assamese',
+  'az': 'Azeri',
+  'ba': 'Bashkir',
+  'be': 'Belarusian',
+  'bg': 'Bulgarian',
+  'bn': 'Bengali',
+  'bo': 'Tibetan',
+  'br': 'Breton',
+  'bs': 'Bosnian',
+  'ca': 'Catalan',
+  'co': 'Corsican',
+  'cs': 'Czech',
+  'cy': 'Welsh',
+  'da': 'Danish',
+  'de': 'German',
+  'dsb': 'Lower Sorbian',
+  'dv': 'Divehi',
+  'el': 'Greek',
+  'en': 'English',
+  'es': 'Spanish',
+  'es-419': 'Latin-american Spanish',
+  'et': 'Estonian',
+  'eu': 'Basque',
+  'fa': 'Persian',
+  'fi': 'Finnish',
+  'fil': 'Filipino',
+  'fo': 'Faroese',
+  'fr': 'French',
+  'fy': 'Frisian',
+  'ga': 'Irish',
+  'gd': 'Scottish Gaelic',
+  'gl': 'Galician',
+  'gsw': 'Alsatian',
+  'gu': 'Gujarati',
+  'ha': 'Hausa',
+  'he': 'Hebrew',
+  'hi': 'Hindi',
+  'hr': 'Croatian',
+  'hsb': 'Upper Sorbian',
+  'hu': 'Hungarian',
+  'hy': 'Armenian',
+  'id': 'Indonesian',
+  'ig': 'Igbo',
+  'ii': 'Yi',
+  'is': 'Icelandic',
+  'it': 'Italian',
+  'iu': 'Inuktitut',
+  'ja': 'Japanese',
+  'ka': 'Georgian',
+  'kk': 'Kazakh',
+  'kl': 'Greenlandic',
+  'km': 'Khmer',
+  'kn': 'Kannada',
+  'ko': 'Korean',
+  'kok': 'Konkani',
+  'ky': 'Kyrgyz',
+  'lb': 'Luxembourgish',
+  'lo': 'Lao',
+  'lt': 'Lithuanian',
+  'lv': 'Latvian',
+  'mi': 'Maori',
+  'mk': 'Macedonian',
+  'ml': 'Malayalam',
+  'mn': 'Mongolian',
+  'moh': 'Mohawk',
+  'mr': 'Marathi',
+  'ms': 'Malay',
+  'mt': 'Maltese',
+  'my': 'Burmese',
+  'nb': 'Norwegian (Bokmål)',
+  'ne': 'Nepali',
+  'nl': 'Dutch',
+  'nn': 'Norwegian (Nynorsk)',
+  'no': 'Norwegian',
+  'nso': 'Sesotho',
+  'oc': 'Occitan',
+  'or': 'Oriya',
+  'pa': 'Punjabi',
+  'pl': 'Polish',
+  'prs': 'Dari',
+  'ps': 'Pashto',
+  'pt': 'Portuguese',
+  'qut': 'K\'iche',
+  'quz': 'Quechua',
+  'rm': 'Romansh',
+  'ro': 'Romanian',
+  'ru': 'Russian',
+  'rw': 'Kinyarwanda',
+  'sa': 'Sanskrit',
+  'sah': 'Yakut',
+  'se': 'Sami (Northern)',
+  'si': 'Sinhala',
+  'sk': 'Slovak',
+  'sl': 'Slovenian',
+  'sma': 'Sami (Southern)',
+  'smj': 'Sami (Lule)',
+  'smn': 'Sami (Inari)',
+  'sms': 'Sami (Skolt)',
+  'sq': 'Albanian',
+  'sr': 'Serbian',
+  'sv': 'Swedish',
+  'sw': 'Kiswahili',
+  'syr': 'Syriac',
+  'ta': 'Tamil',
+  'te': 'Telugu',
+  'tg': 'Tajik',
+  'th': 'Thai',
+  'tk': 'Turkmen',
+  'tn': 'Setswana',
+  'tr': 'Turkish',
+  'tt': 'Tatar',
+  'tzm': 'Tamazight',
+  'ug': 'Uyghur',
+  'uk': 'Ukrainian',
+  'ur': 'Urdu',
+  'uz': 'Uzbek',
+  'vi': 'Vietnamese',
+  'wo': 'Wolof',
+  'xh': 'isiXhosa',
+  'yo': 'Yoruba',
+  'zh': 'Chinese',
+  'zh-tw': 'Taiwan Chinese',
+  'zu': 'isiZulu'
+}
 
 export { view };

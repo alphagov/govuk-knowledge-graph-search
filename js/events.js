@@ -60,12 +60,18 @@ const keywordSearchQuery = function(state, keywords, exclusions) {
     areaClause = 'AND n.publishing_app = "whitehall"';
   }
 
+  let localeClause = '';
+  if (state.selectedLocale !== '') {
+    localeClause = `AND n.locale = "${state.selectedLocale}"\n`
+  }
+
   const taxon = state.selectedTaxon;
 
   return `
     MATCH (n:Cid)
     ${inclusionClause}
     ${exclusionClause}
+    ${localeClause}
     ${areaClause}
     OPTIONAL MATCH (n:Cid)-[r:HAS_PRIMARY_PUBLISHING_ORGANISATION]->(o:Organisation)
     OPTIONAL MATCH (n:Cid)-[:HAS_ORGANISATIONS]->(o2:Organisation)
@@ -116,6 +122,7 @@ const contentIdSearchButtonClicked = async function() {
     ${returnClause()}`;
   queryGraph(state.searchQuery);
 };
+
 
 const cypherSearchButtonClicked = async function() {
   queryGraph(state.searchQuery);
@@ -173,6 +180,7 @@ const handleEvent = async function(event) {
         state.excludedWords = sanitise(id('excluded-keyword').value);
         state.combinator = id('and-or').selectedIndex == 0 ? 'and' : 'or';
         state.selectedTaxon = document.querySelector('#taxon input').value;
+        state.selectedLocale = state.locales[id('locale').selectedIndex];
         state.whereToSearch.title = id('search-title').checked;
         state.whereToSearch.text = id('search-text').checked;
         state.caseSensitive = id('case-sensitive').checked;
@@ -269,6 +277,7 @@ const updateUrl = function() {
       if (state.excludedWords !== '') searchParams.set('excluded-words', state.excludedWords);
       if (state.combinator !== 'and') searchParams.set('combinator', state.combinator);
       if (state.selectedTaxon !== '') searchParams.set('selected-taxon', state.selectedTaxon);
+      if (state.selectedLocale !== '') searchParams.set('lang', state.selectedLocale);
       if (state.caseSensitive) searchParams.set('case-sensitive', state.caseSensitive);
       if (!state.whereToSearch.title) searchParams.set('search-in-title', 'false');
       if (state.whereToSearch.text) searchParams.set('search-in-text', 'true');

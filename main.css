@@ -6606,7 +6606,7 @@ pre {
   margin-right: 10px;
 }
 #keyword-search-panel #excluded-keyword {
-  max-width: 405px;
+  max-width: 250px;
 }
 #keyword-search-panel .keyword-label {
   display: inline-block;
