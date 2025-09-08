@@ -125,8 +125,12 @@ class App {
         genid: generateSessionId,
       })
     )
-
-    this.app.set('trust proxy', 1) // trust first proxy
+    /*
+    'trust proxy' must be set to 2 when deployed behind GCP load-balancing in order to correctly identify
+    the requestor's IP address rather than that of the load-balancer. This is required for per-user rate-limiting.
+    See also - https://cloud.google.com/load-balancing/docs/https#x-forwarded-for_header
+    */
+    this.app.set('trust proxy', 2)
     this.app.use(passport.initialize())
     this.app.use(passport.session())
 
