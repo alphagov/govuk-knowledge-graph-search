@@ -1,5 +1,4 @@
 name: Jest Coverage Check
-
 on:
   push:
     branches: [main]
@@ -10,6 +9,10 @@ jobs:
   test:
     name: Jest Test with Coverage Check
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      actions: write
 
     steps:
       - name: Check out code
