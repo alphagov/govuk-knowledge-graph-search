@@ -87,6 +87,8 @@ To run a single test file , use `--spec`. For instance:
 
 ### Staging Deployment
 
+The staging environment can be accessed here: https://govgraphsearchstaging.dev/
+
 Staging deployment is triggered automatically whenever a pull request is merged into the main branch.
 
 This is made possible by the deploy-staging GitHub Action.
