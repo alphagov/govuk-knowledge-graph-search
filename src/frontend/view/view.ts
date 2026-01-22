@@ -2,7 +2,6 @@ import { queryDescription } from '../utils/queryDescription'
 import { id, splitKeywords } from '../../common/utils/utils'
 import { state, searchState, CSVDownloadType } from '../state'
 import { handleEvent } from '../events'
-import { viewMetaResults } from './view-metabox'
 import { viewAdvancedSearchPanel, viewSearchPanel } from './view-search-panel'
 import { EventType } from '../types/event-types'
 import { USER_ERRORS } from '../enums/constants'
@@ -15,7 +14,6 @@ import {
   SearchType,
   UrlParams,
 } from '../../common/types/search-api-types'
-import config from '../config'
 
 declare const window: any
 
@@ -77,13 +75,10 @@ const view = () => {
     dispatchCustomGAEvent('formSubmission', {
       formType: 'Search',
       formPosition: 'Page',
+      userOrganisation: state.signonProfileData?.user?.organisation_slug || '',
     })
     handleEvent({ type: EventType.Dom, id: 'search' })
   })
-
-  id('meta-results-expand')?.addEventListener('click', () =>
-    handleEvent({ type: EventType.Dom, id: 'toggleDisamBox' })
-  )
 
   id('csv-download-select')?.addEventListener('change', (e) => {
     const downloadType = (e.target as HTMLSelectElement)
@@ -145,6 +140,7 @@ const tabs = [
     label: 'Languages',
     searchType: SearchType.Language,
   },
+  { id: 'search-persons', label: 'Persons', searchType: SearchType.Person },
   {
     id: 'search-adv',
     label: 'Advanced',
@@ -197,7 +193,10 @@ const viewMainLayout = () => {
       result.push(viewSearchResults())
     }
   } else {
-    result.push(`
+    if (state.searchResults) {
+      result.push(viewSearchResults())
+    } else {
+      result.push(`
       <div class="govuk-grid-row simple-search">
         <div class="govuk-grid-column-two-thirds">
           ${viewSearchPanel()}
@@ -205,6 +204,7 @@ const viewMainLayout = () => {
       </div>
       ${viewSearchResults()}
     `)
+    }
   }
   result.push(`</div>`)
   return result.join('')
@@ -317,7 +317,7 @@ const viewSearchResultsTable = () => {
 }
 
 const viewWaiting = () => `
-  <div aria-live="polite" role="region">
+  <div aria-live="polite" role="region" role="status" aria-live="assertive">
     <h1 class="govuk-body">${queryDescription({
       searchParams: state.searchParams,
       waiting: true,
@@ -352,14 +352,16 @@ const viewResults = function () {
     html.push(`<div class="results-comments">`)
     if (nbRecords < 10000) {
       html.push(
-        `<h1 class="govuk-body">${queryDescription({
-          searchParams: state.searchParams,
-          nbRecords,
-        })}</h1>`
+        `<h1 class="govuk-body" role="status" aria-live="assertive">${queryDescription(
+          {
+            searchParams: state.searchParams,
+            nbRecords,
+          }
+        )}</h1>`
       )
     } else {
       html.push(`
-        <h1 class="govuk-warning-text">
+        <h1 class="govuk-warning-text" role="status" aria-live="assertive">
           <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
           <strong class="govuk-warning-text__text">
             <span class="govuk-warning-text__assistive">Warning</span>
@@ -371,10 +373,6 @@ const viewResults = function () {
 
     // .results-comments
     html.push(`</div>`)
-
-    if (config.featureFlags.enableInfoBox) {
-      html.push(viewMetaResults())
-    }
 
     // .before-results-container
     html.push(`</div>`)
@@ -428,7 +426,7 @@ const viewNoResults = () => {
     newUrl = `?${newSearchParams.toString()}`
   }
   return `
-    <h1 class="govuk-body govuk-inset-text">
+    <h1 class="govuk-body govuk-inset-text" role="status" aria-live="assertive">
       <span class="govuk-!-font-weight-bold">No results</span> for ${queryDescription(
         {
           searchParams: state.searchParams,
@@ -473,12 +471,7 @@ const viewSearchResults = () => {
           search: document.title,
           resultsFound: false,
         })
-
-      return [
-        config.featureFlags.enableInfoBox ? viewMetaResults() : '',
-        viewNoResults(),
-      ].join('')
-
+      return viewNoResults()
     default:
       document.title = serviceName
       return ''

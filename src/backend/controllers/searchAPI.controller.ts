@@ -1,9 +1,5 @@
 import { RequestHandler } from 'express'
-import {
-  sendInitQuery,
-  sendSearchQuery,
-  getTaxonInfo,
-} from '../bigquery/bigquery'
+import { sendInitQuery, sendSearchQuery } from '../bigquery/bigquery'
 
 import { SearchParams } from '../../common/types/search-api-types'
 import { getParams } from '../utils/getParams'
@@ -28,7 +24,7 @@ class SearchAPIController {
     const { phoneNumber, error } = parsePhoneNumber(params.phoneNumber)
     if (error) {
       const errorMessage = 'The phone number could not be parsed'
-      log.error({ phoneNumber: params.phoneNumber }, errorMessage)
+      log.error({ phoneNumber }, errorMessage)
       res.status(400).send(errorMessage)
       return
     }
@@ -38,20 +34,6 @@ class SearchAPIController {
     } catch (e: any) {
       log.error({ error: e }, 'ERROR fetching search data')
       res.status(500).send(e)
-    }
-  }
-
-  public searchTaxon: RequestHandler = async (req, res) => {
-    try {
-      const data = await getTaxonInfo(req.query.name as string)
-      res.send(data)
-    } catch (e: any) {
-      if (e.status === 404) {
-        res.status(e.status).send(e.message)
-      } else {
-        log.error({ error: e }, 'ERROR fetching search taxon')
-        res.status(500).send(e.message)
-      }
     }
   }
 }

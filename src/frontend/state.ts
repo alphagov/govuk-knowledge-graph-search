@@ -3,7 +3,7 @@ import {
   SearchType,
   SearchParams,
   Combinator,
-  PublishingApplication,
+  PoliticalStatus,
   KeywordLocation,
   UrlParams,
   PublishingStatus,
@@ -39,9 +39,13 @@ export const initialSearchParams: SearchParams = {
   phoneNumber: '',
   keywordLocation: KeywordLocation.All,
   combinator: Combinator.All,
-  publishingApplication: PublishingApplication.Any,
+  publishingApp: '',
   caseSensitive: false, // whether the keyword search is case sensitive
   publishingStatus: PublishingStatus.All,
+  politicalStatus: PoliticalStatus.Any,
+  government: '',
+  linksExactMatch: false,
+  associatedPerson: '',
 }
 
 const defaultShowFields = {
@@ -71,9 +75,9 @@ const initState = () => {
     organisations: [], // list of names of all the organisations
     systemErrorText: null,
     documentTypes: [],
+    governments: [],
     userErrors: [], // error codes due to user not entering valid search criteria
     searchResults: null,
-    metaSearchResults: null,
     skip: 0, // where to start the pagination (number of results)
     pagination: {
       resultsPerPage: config.pagination.defaultResultsPerPage, // number of results per page
@@ -82,12 +86,13 @@ const initState = () => {
     stagedShowFields: showFields,
     showFields, // what result columns to show
     waiting: false, // whether we're waiting for a request to return,
-    disamboxExpanded: false, // if there's a resizeable disamb meta box, whether it's expanded or not
     showFiltersPane: true,
     showFieldSet: true,
     sorting: defaultSortingState,
     CSVDownloadType: CSVDownloadType.ALL,
     phoneNumberError: false,
+    publishingApps: [], // all the publishing apps listed in the search.publishing_app table
+    persons: [], // all the persons listed in the search.people table
   }
   if (cachedLayout) {
     const { showFiltersPane, showFieldSet } = loadLayoutStateFromCache()
@@ -154,8 +159,12 @@ const setStateSearchParamsFromURL = function (): void {
     'caseSensitive',
     UrlParams.CaseSensitive
   )
-  state.searchParams.publishingApplication = getURLParamOrFallback(
-    'publishingApplication',
+  state.searchParams.linksExactMatch = getURLParamOrFallback(
+    'linksExactMatch',
+    UrlParams.LinksExactMatch
+  )
+  state.searchParams.publishingApp = getURLParamOrFallback(
+    'publishingApp',
     UrlParams.PublishingApplication
   )
   state.searchParams.combinator = getURLParamOrFallback(
@@ -177,6 +186,16 @@ const setStateSearchParamsFromURL = function (): void {
     'publishingStatus',
     UrlParams.PublishingStatus
   )
+
+  state.searchParams.politicalStatus = getURLParamOrFallback(
+    'politicalStatus',
+    UrlParams.PoliticalStatus
+  )
+
+  state.searchParams.government = getURLParamOrFallback(
+    'government',
+    UrlParams.Government
+  )
 }
 
 const searchStateIsUnset = function (): boolean {
@@ -190,8 +209,11 @@ const searchStateIsUnset = function (): boolean {
     state.searchParams.linkSearchUrl === '' &&
     state.searchParams.phoneNumber === '' &&
     state.searchParams.documentType === '' &&
-    state.searchParams.publishingApplication === PublishingApplication.Any &&
-    state.searchParams.publishingStatus === PublishingStatus.All
+    state.searchParams.publishingApp === '' &&
+    state.searchParams.publishingStatus === PublishingStatus.All &&
+    state.searchParams.politicalStatus === PoliticalStatus.Any &&
+    state.searchParams.government === '' &&
+    state.searchParams.associatedPerson === ''
   )
 }
 
@@ -232,12 +254,14 @@ const resetSearchState = function (): void {
   state.searchParams.linkSearchUrl = ''
   state.searchParams.phoneNumber = ''
   state.skip = 0 // reset to first page
-  state.searchParams.publishingApplication = PublishingApplication.Any
+  state.searchParams.publishingApp = ''
   state.searchResults = null
   state.waiting = false
   state.searchParams.combinator = Combinator.All
   state.searchParams.publishingStatus = PublishingStatus.All
   state.searchParams.documentType = ''
+  state.searchParams.politicalStatus = PoliticalStatus.Any
+  state.searchParams.government = ''
 }
 
 export {

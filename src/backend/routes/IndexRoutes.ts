@@ -1,7 +1,7 @@
 import { Router } from 'express'
+import MeController from '../controllers/me.controller'
 import SearchController from '../controllers/search.controller'
 import SearchAPIController from '../controllers/searchAPI.controller'
-import InfoBoxController from '../controllers/infoBox.controller'
 import DownloadCSVController from '../controllers/downloadCSV.controller'
 import CookiesController from '../controllers/cookies.controller'
 import FeedbackSurveyController from '../controllers/feedbackSurvey.controller'
@@ -10,9 +10,9 @@ import { auth } from '../middleware/auth'
 
 class IndexRoute implements Routes {
   public router = Router()
+  public meController = new MeController()
   public searchController = new SearchController()
   public searchAPIController = new SearchAPIController()
-  public infoBoxController = new InfoBoxController()
   public downloadCSVController = new DownloadCSVController()
   public cookiesController = new CookiesController()
   public feedbackSurveyController = new FeedbackSurveyController()
@@ -22,6 +22,8 @@ class IndexRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.get(Route.me, auth(), this.meController.me)
+
     this.router.get(Route.search, auth(), this.searchController.search)
 
     this.router.get(
@@ -33,45 +35,9 @@ class IndexRoute implements Routes {
     this.router.get(Route.searchApi, auth(), this.searchAPIController.searchApi)
 
     this.router.get(
-      Route.searchTaxon,
-      auth(),
-      this.searchAPIController.searchTaxon
-    )
-
-    this.router.get(
       Route.downloadCSV,
       auth(),
       this.downloadCSVController.downloadCSV
-    )
-
-    this.router.get(
-      Route.infoBoxOrganisation,
-      auth(),
-      this.infoBoxController.infoBoxOrganisation
-    )
-
-    this.router.get(
-      Route.infoBoxRole,
-      auth(),
-      this.infoBoxController.infoBoxRole
-    )
-
-    this.router.get(
-      Route.infoBoxBankHoliday,
-      auth(),
-      this.infoBoxController.infoBoxBankHoliday
-    )
-
-    this.router.get(
-      Route.infoBoxTransaction,
-      auth(),
-      this.infoBoxController.infoBoxTransaction
-    )
-
-    this.router.get(
-      Route.infoBoxPerson,
-      auth(),
-      this.infoBoxController.infoBoxPerson
     )
 
     this.router.get(Route.cookies, auth(), this.cookiesController.cookies)

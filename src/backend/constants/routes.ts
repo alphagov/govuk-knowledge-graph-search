@@ -6,16 +6,12 @@ interface Routes {
 }
 
 export enum Route {
+  me = '/me',
   search = '/',
   getInitData = '/get-init-data',
   searchApi = '/search',
   searchTaxon = '/taxon',
   downloadCSV = '/csv',
-  infoBoxOrganisation = '/organisation',
-  infoBoxRole = '/role',
-  infoBoxBankHoliday = '/bank-holiday',
-  infoBoxTransaction = '/transaction',
-  infoBoxPerson = '/person',
   login = '/login',
   loginCallback = '/auth/gds/callback',
   reauth = '/auth/gds/api/users/:userId/reauth',

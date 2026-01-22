@@ -3,8 +3,8 @@ import { Sorting, SortAction } from '../types/state-types'
 import {
   Combinator,
   KeywordLocation,
-  PublishingApplication,
   PublishingStatus,
+  PoliticalStatus,
   SearchParams,
   SearchType,
 } from '../../common/types/search-api-types'
@@ -32,9 +32,13 @@ const DEFAULT_SEARCH_PARAMS: SearchParams = {
   phoneNumber: '',
   keywordLocation: KeywordLocation.BodyContent,
   combinator: Combinator.All,
-  publishingApplication: PublishingApplication.Whitehall,
+  publishingApp: 'whitehall',
   caseSensitive: false,
   publishingStatus: PublishingStatus.NotWithdrawn,
+  politicalStatus: PoliticalStatus.Any,
+  government: '',
+  linksExactMatch: false,
+  associatedPerson: '',
 }
 
 const makeParams = (overrides: PartialSearchParams = {}): SearchParams => {
@@ -126,13 +130,26 @@ describe('queryDescription', () => {
   it('should handle publishingApplication', () => {
     const params = {
       searchParams: makeParams({
-        publishingApplication: PublishingApplication.Whitehall,
+        publishingApp: 'whitehall',
       }),
       includeMarkup: true,
     }
     const description = queryDescription(params)
     expect(description).toContain(
       'are published using <span class="govuk-!-font-weight-bold">whitehall</span>'
+    )
+  })
+
+  it('should handle politicalStatus', () => {
+    const params = {
+      searchParams: makeParams({
+        politicalStatus: PoliticalStatus.NotPolitical,
+      }),
+      includeMarkup: true,
+    }
+    const description = queryDescription(params)
+    expect(description).toContain(
+      'are <span class="govuk-!-font-weight-bold">not political</span>'
     )
   })
 

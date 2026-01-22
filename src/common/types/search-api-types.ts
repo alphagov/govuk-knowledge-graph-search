@@ -13,6 +13,10 @@ export enum UrlParams {
   PublishingApplication = 'publishing-application',
   PublishingStatus = 'publishing-status',
   Language = 'language',
+  PoliticalStatus = 'political-status',
+  Government = 'government',
+  LinksExactMatch = 'links-exact-match',
+  AssociatedPerson = 'associated-person',
 }
 
 export enum SearchType {
@@ -24,6 +28,7 @@ export enum SearchType {
   Language = 'language',
   Advanced = 'advanced',
   Results = 'results',
+  Person = 'person',
 }
 
 export enum Combinator {
@@ -45,10 +50,10 @@ export enum PublishingStatus {
   All = 'all',
 }
 
-export enum PublishingApplication {
+export enum PoliticalStatus {
   Any = 'any',
-  Whitehall = 'whitehall',
-  Publisher = 'publisher',
+  Political = 'political',
+  NotPolitical = 'notPolitical',
 }
 
 export type SearchParams = {
@@ -63,119 +68,26 @@ export type SearchParams = {
   phoneNumber: string // the phone number to search for
   keywordLocation: KeywordLocation // what parts of the pages to search in
   combinator: Combinator // all keywords or any keywords
-  publishingApplication: PublishingApplication // whitehall, publisher, both
+  publishingApp: string // publishing app to search for
   caseSensitive: boolean // case sensitive keyword search?
   publishingStatus: PublishingStatus // Withdrawn, not withdrawn etc.
+  politicalStatus: PoliticalStatus // page is politial: true, false, null
+  government: string // government that published the page.
+  linksExactMatch: boolean // links to match exactly
+  associatedPerson: string // person associated with the page
 }
 
-export enum MetaResultType {
-  Person = 'Person',
-  Organisation = 'Organisation',
-  BankHoliday = 'BankHoliday',
-  Role = 'Role',
-  Taxon = 'Taxon',
-  Transaction = 'Transaction',
-}
-
-export type Person = {
-  type: MetaResultType
-  name: string
-  homepage: string
-  description: string
-  roles: {
-    title: string
-    orgs: {
-      orgName: string
-      orgUrl: string
-    }[]
-    orgName: string
-    orgUrl: string
-    startDate: Date
-    endDate: Date | null
-  }[]
-}
-
-export type Organisation = {
-  type: MetaResultType
-  name: string
-  homepage: string
-  description: string
-  parentOrgNames: string[]
-  childOrgNames: string[]
-  personRoleNames: {
-    personName: string
-    roleName: string
-  }[]
-  supersededBy: string[]
-  supersedes: string[]
-}
-
-export type Taxon = {
-  type: MetaResultType
-  name: string
-  homepage: string
-  description: string
-  level: number
-  ancestorTaxons: {
-    url: string
-    name: string
-    level: number
-  }[]
-  childTaxons: {
-    url: string
-    name: string
-    level: number
-  }[]
-}
-
-export type Transaction = {
-  type: MetaResultType
-  name: string
-  description: string
-  homepage: string
-}
-
-export type BankHoliday = {
-  type: MetaResultType
-  name: string
-  dates: string[]
-  divisions: string[]
-}
-
-export type Role = {
-  type: MetaResultType
-  name: string
-  description: string
-  personNames: {
-    name: string
-    homepage: string
-    startDate: Date
-    endDate: Date | null
-  }[]
-  orgNames: string[]
-}
-
-// a neo4 search can return a variable number of records of any type
-export type MainResult = unknown
-
-export type MetaResult =
-  | Person
-  | Organisation
-  | BankHoliday
-  | Transaction
-  | Role
-  | Taxon
-
-export type SearchResults = {
-  main: MainResult[]
-  meta: MetaResult[]
-}
+// a search can return a variable number of records of any type
+export type SearchResults = unknown[]
 
 export type InitResults = {
   taxons: string[]
   locales: string[]
   organisations: string[]
   documentTypes: string[]
+  governments: string[]
+  publishingApps: string[]
+  persons: string[]
 }
 
 export type Occurrence = {

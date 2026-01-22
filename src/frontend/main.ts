@@ -10,8 +10,8 @@ import { fetchWithTimeout, queryBackend } from './search-api'
 import config from './config'
 import { defaultAllLanguagesOption } from '../common/utils/lang'
 import {
-  PublishingApplication,
   PublishingStatus,
+  PoliticalStatus,
 } from '../common/types/search-api-types'
 
 //= =================================================
@@ -19,6 +19,10 @@ import {
 //= =================================================
 
 // dummy comment
+
+const signon = async function () {
+  state.signonProfileData = await fetchWithTimeout('/me')
+}
 
 const getInitialData = async function () {
   console.log('retrieving taxons, locales and organisations')
@@ -41,6 +45,9 @@ const fetchInitialData = async function () {
     state.organisations = dbInitResults.organisations
     state.locales = dbInitResults.locales
     state.documentTypes = dbInitResults.documentTypes
+    state.governments = dbInitResults.governments
+    state.publishingApps = dbInitResults.publishingApps
+    state.persons = dbInitResults.persons
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       state.systemErrorText = 'It looks like the backend is not responding.'
@@ -66,8 +73,10 @@ const fetchInitialData = async function () {
       state.searchParams.linkSearchUrl !== '' ||
       state.searchParams.phoneNumber !== '' ||
       state.searchParams.documentType !== '' ||
-      state.searchParams.publishingApplication !== PublishingApplication.Any ||
-      state.searchParams.publishingStatus !== PublishingStatus.All
+      state.searchParams.publishingApp !== '' ||
+      state.searchParams.publishingStatus !== PublishingStatus.All ||
+      state.searchParams.politicalStatus !== PoliticalStatus.Any ||
+      state.searchParams.government !== ''
     ) {
       state.waiting = true
       console.log('REQUERYING BACKEND')
@@ -82,6 +91,7 @@ const fetchInitialData = async function () {
 
 const initWithoutHMR = async () => {
   initState()
+  await signon()
   await fetchInitialData()
   if (!state.systemErrorText) {
     setQueryParamsFromQS()

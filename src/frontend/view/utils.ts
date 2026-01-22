@@ -74,6 +74,9 @@ export const fieldFormatters: Record<Field, any> = {
     name: 'Occurrences',
     format: formatOccurrences,
   },
+  government: { name: 'Government' },
+  is_political: { name: 'Is political' },
+  people: { name: 'Associated People', format: formatNames },
 }
 
 export const fieldName = function (key: string) {

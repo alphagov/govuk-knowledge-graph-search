@@ -1,19 +1,9 @@
 // todo: split into models
 
 import {
-  Transaction,
-  Taxon,
-  Organisation,
-  Person,
-  Role,
-  MetaResultType,
-  MetaResult,
-  MainResult,
   SearchParams,
   SearchResults,
-  SearchType,
   InitResults,
-  BankHoliday,
 } from '../../common/types/search-api-types'
 import { splitKeywords } from '../../common/utils/utils'
 import { languageCode } from '../../common/utils/lang'
@@ -65,8 +55,17 @@ export const bigQuery = async function (userQuery: string, options?: any) {
     if (options.documentType) {
       params.documentType = options.documentType
     }
-    if (options.selectedWordsWithoutQuotes !== undefined) {
-      params.selected_words_without_quotes = options.selectedWordsWithoutQuotes
+    if (options.politicalStatus) {
+      params.politicalStatus = options.politicalStatus
+    }
+    if (options.government) {
+      params.government = options.government
+    }
+    if (options.publishingApp) {
+      params.publishingApp = options.publishingApp
+    }
+    if (options.associatedPerson) {
+      params.associatedPerson = options.associatedPerson
     }
   }
 
@@ -84,27 +83,52 @@ export const bigQuery = async function (userQuery: string, options?: any) {
 //= ===== public ======
 
 const sendInitQuery = async function (): Promise<InitResults> {
-  let bqLocales: any, bqTaxons: any, bqOrganisations: any, bqDocumentTypes: any
+  let bqLocales: any,
+    bqTaxons: any,
+    bqOrganisations: any,
+    bqDocumentTypes: any,
+    bqGovernments: any,
+    bqPublishingApps: any,
+    bqPersons: any
   try {
-    ;[bqLocales, bqTaxons, bqOrganisations, bqDocumentTypes] =
-      await Promise.all([
-        bigQuery(`
+    ;[
+      bqLocales,
+      bqTaxons,
+      bqOrganisations,
+      bqDocumentTypes,
+      bqGovernments,
+      bqPublishingApps,
+      bqPersons,
+    ] = await Promise.all([
+      bigQuery(`
         SELECT DISTINCT locale
-        FROM \`content.locale\`
+        FROM \`search.locale\`
         `),
-        bigQuery(`
-        SELECT name
+      bigQuery(`
+        SELECT DISTINCT name
         FROM \`search.taxon\`
         `),
-        bigQuery(`
+      bigQuery(`
         SELECT DISTINCT title
-        FROM \`graph.organisation\`
+        FROM \`search.organisation\`
         `),
-        bigQuery(`
+      bigQuery(`
         SELECT DISTINCT document_type
-        FROM \`content.document_type\`
+        FROM \`search.document_type\`
         `),
-      ])
+      bigQuery(`
+        SELECT DISTINCT title
+        FROM \`search.government\`
+        `),
+      bigQuery(`
+        SELECT DISTINCT publishing_app
+        FROM \`search.publishing_app\`
+        `),
+      bigQuery(`
+        SELECT DISTINCT title 
+        FROM \`search.person\`
+        `),
+    ])
   } catch (error) {
     log.error(error, 'Error in sendInitQueryError')
   }
@@ -121,63 +145,12 @@ const sendInitQuery = async function (): Promise<InitResults> {
     documentTypes: bqDocumentTypes.map(
       (documentType: any) => documentType.document_type
     ),
+    governments: bqGovernments.map((government: any) => government.title),
+    publishingApps: bqPublishingApps.map(
+      (publishingApp: any) => publishingApp.publishing_app
+    ),
+    persons: bqPersons.map((person: any) => person.title),
   }
-}
-
-const getTaxonInfo = async function (name: string): Promise<Taxon[]> {
-  return await bigQuery(
-    `SELECT "Taxon" as type, * FROM search.taxon WHERE lower(name) = lower(@name);`,
-    { name }
-  )
-}
-
-const getOrganisationInfo = async function (
-  name: string
-): Promise<Organisation[]> {
-  return await bigQuery(
-    `SELECT "Organisation" as type, * FROM search.organisation WHERE lower(name) = lower(@name);`,
-    { name }
-  )
-}
-
-const getBankHolidayInfo = async function (
-  name: string
-): Promise<BankHoliday[]> {
-  const bqBankHolidays: BankHoliday[] = await bigQuery(
-    `SELECT * FROM search.bank_holiday WHERE lower(name) = lower(@name);`,
-    { name }
-  )
-  return bqBankHolidays.map((bqBankHoliday: BankHoliday) => {
-    return {
-      type: MetaResultType.BankHoliday,
-      name: bqBankHoliday.name,
-      dates: bqBankHoliday.dates.map((date: any) => date.value),
-      divisions: bqBankHoliday.divisions,
-    }
-  })
-}
-
-const getTransactionInfo = async function (
-  name: string
-): Promise<Transaction[]> {
-  return await bigQuery(
-    `SELECT "Transaction" as type, * FROM search.transaction WHERE lower(name) = lower(@name);`,
-    { name }
-  )
-}
-
-const getRoleInfo = async function (name: string): Promise<Role[]> {
-  return await bigQuery(
-    `SELECT "Role" as type, * FROM search.role WHERE lower(name) = lower(@name);`,
-    { name }
-  )
-}
-
-const getPersonInfo = async function (name: string): Promise<Person[]> {
-  return await bigQuery(
-    `SELECT "Person" as type, * FROM search.person WHERE lower(name) = lower(@name);`,
-    { name }
-  )
 }
 
 // keywords as used here must be exactly the same set of combinedWords as used by the function containDescription.
@@ -191,12 +164,12 @@ const sendSearchQuery = async function (
   const taxon = searchParams.taxon
   const organisation = searchParams.publishingOrganisation
   const documentType = searchParams.documentType
-  const selectedWordsWithoutQuotes = searchParams.selectedWords.replace(
-    /"/g,
-    ''
-  )
   const link = searchParams.linkSearchUrl
   const phoneNumber = searchParams.phoneNumber
+  const government = searchParams.government
+  const politicalStatus = searchParams.politicalStatus
+  const publishingApp = searchParams.publishingApp
+  const associatedPerson = searchParams.associatedPerson
   const queries = [
     bigQuery(query, {
       keywords,
@@ -207,61 +180,16 @@ const sendSearchQuery = async function (
       link,
       phoneNumber,
       documentType,
+      government,
+      politicalStatus,
+      publishingApp,
+      associatedPerson,
     }),
   ]
 
-  let bqMetaResults: MetaResult[] = []
-  let bqMainResults: MainResult[] = []
-  let results: unknown[][]
+  const results: unknown[][] = await Promise.all(queries)
 
-  switch (searchParams.searchType) {
-    case SearchType.Taxon:
-      results = await Promise.all(queries)
-      bqMainResults = results[0]
-      bqMetaResults = await getTaxonInfo(searchParams.taxon)
-      break
-    case SearchType.Organisation:
-      results = await Promise.all(queries)
-      bqMainResults = results[0]
-      bqMetaResults = await getOrganisationInfo(
-        searchParams.publishingOrganisation
-      )
-      break
-    default:
-      if (
-        selectedWordsWithoutQuotes &&
-        selectedWordsWithoutQuotes.length > 5 &&
-        selectedWordsWithoutQuotes.includes(' ')
-      ) {
-        queries.push(
-          bigQuery(
-            `SELECT *
-         FROM search.thing
-         WHERE CONTAINS_SUBSTR(name, @selected_words_without_quotes)
-         ;`,
-            { selectedWordsWithoutQuotes }
-          )
-        )
-      }
-      results = await Promise.all(queries)
-      bqMainResults = results[0]
-      bqMetaResults = results.length > 1 ? (results[1] as MetaResult[]) : []
-      break
-  }
-  const result: SearchResults = {
-    main: bqMainResults,
-    meta: bqMetaResults,
-  }
-  return result
+  return results[0]
 }
 
-export {
-  getBankHolidayInfo,
-  getTransactionInfo,
-  getOrganisationInfo,
-  getPersonInfo,
-  getRoleInfo,
-  getTaxonInfo,
-  sendInitQuery,
-  sendSearchQuery,
-}
+export { sendInitQuery, sendSearchQuery }

@@ -15,6 +15,7 @@ Docs](https://docs.data-community.publishing.service.gov.uk).
 
 - Clone this repository
 - Run `npm install` to install all dependencies
+- Run `npm run build`
 - Install [Sass](https://sass-lang.com/install) and compile the Sass sources to CSS with `sass ./src/frontend/scss/main.scss > ./public/main.css`
 
 - Install [webpack](https://webpack.js.org/) and compile the browser-side Typescript code to JavaScript by just running `webpack`
@@ -32,7 +33,7 @@ Docs](https://docs.data-community.publishing.service.gov.uk).
 
 - Start the server with `npm run dev`.
 
-- Point your browser to `https://localhost:8080` (the port can be changed using the `PORT` environment variable)
+- Point your browser to `http://localhost:8080` (the port can be changed using the `PORT` environment variable)
 
 # Developing
 
@@ -86,6 +87,8 @@ To run a single test file , use `--spec`. For instance:
 
 ### Staging Deployment
 
+The staging environment can be accessed here: https://govgraphsearchstaging.dev/
+
 Staging deployment is triggered automatically whenever a pull request is merged into the main branch.
 
 This is made possible by the deploy-staging GitHub Action.
@@ -120,7 +123,7 @@ Production deployments have to be triggered manually for security reasons.
 
 ## Deployment Steps
 
-1. Go to production site https://govgraphsearch.dev/ and view the source.
+1. Go to production site https://gov-search.service.gov.uk/ and view the source.
 2. Look for the line beginning `<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?` and note the values of the URL parameters `id` and `gtm_auth`. They look like `GTM-XXXXXXX` and `aWEg5ABBXXXXXXXXXXXXXXXXX`.
 3. Run the script `deploy-to-gcp.sh` located at the root directory
 4. Enter the value of `id` as in step 2 as the GTM tracking ID.
@@ -183,3 +186,7 @@ log.error(error, 'error')
 // If you want to log an object:
 log.info({ a: 123, b: 456 }, 'This is a log')
 ```
+
+# Web analytics
+
+Some of the activity of users who consent to a tracking cookie can be viewed in a [GA4 dashboard](https://analytics.google.com/analytics/web/?authuser=0#/p303522524/reports/intelligenthome).

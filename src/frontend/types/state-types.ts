@@ -1,5 +1,6 @@
 import { SearchParams } from '../../common/types/search-api-types'
 import { CSVDownloadType } from '../state'
+import { SignonProfileData } from '../../backend/constants/types'
 
 export type Field =
   | 'url'
@@ -17,6 +18,9 @@ export type Field =
   | 'withdrawn_at'
   | 'withdrawn_explanation'
   | 'occurrences'
+  | 'government'
+  | 'is_political'
+  | 'people'
 
 export enum SortAction {
   DESC = 'desc',
@@ -33,17 +37,17 @@ export interface State {
   taxons: string[]
   organisations: string[]
   locales: string[]
+  governments: string[]
   systemErrorText: any
   userErrors: string[]
   searchResults: any[] | null
-  metaSearchResults: any[] | null
   skip: number
+
   pagination: {
     currentPage: number
     resultsPerPage: number
   }
   waiting: boolean
-  disamboxExpanded: boolean
   stagedShowFields: any
   showFields: any
   showFiltersPane: boolean
@@ -52,4 +56,7 @@ export interface State {
   sorting: Partial<Record<Field, SortAction>>
   CSVDownloadType: CSVDownloadType
   phoneNumberError: boolean | null
+  signonProfileData?: SignonProfileData
+  publishingApps: string[]
+  persons: string[]
 }

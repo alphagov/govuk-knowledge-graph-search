@@ -1,8 +1,8 @@
 import {
   Combinator,
   KeywordLocation,
-  PublishingApplication,
   PublishingStatus,
+  PoliticalStatus,
   SearchParams,
   SearchType,
 } from '../../common/types/search-api-types'
@@ -42,7 +42,6 @@ describe('[Function] bigQuery', () => {
       taxon: 'taxon',
       organisation: 'organisation',
       link: 'link',
-      selectedWordsWithoutQuotes: 'selectedWordsWithoutQuotes',
     }
     ;(BigQuery.prototype.query as jest.Mock).mockResolvedValue([1, 2, 3])
     await bigQuery('query', options)
@@ -61,7 +60,6 @@ describe('[Function] bigQuery', () => {
         taxon: 'taxon',
         organisation: 'organisation',
         link: 'link',
-        selected_words_without_quotes: 'selectedWordsWithoutQuotes',
       },
     })
   })
@@ -86,21 +84,32 @@ describe('[Function] sendInitQuery', () => {
           { document_type: 'dt3' },
         ],
       ])
+      .mockResolvedValueOnce([
+        [{ title: 'gov1' }, { title: 'gov2' }, { title: 'gov3' }],
+      ])
+      .mockResolvedValueOnce([
+        [
+          { publishing_app: 'app`' },
+          { publishing_app: 'app2' },
+          { publishing_app: 'app3' },
+        ],
+      ])
+      .mockResolvedValueOnce([[{ title: 'Mr Something' }]])
     const result = await sendInitQuery()
 
-    expect(BigQuery.prototype.query).toHaveBeenCalledTimes(4)
+    expect(BigQuery.prototype.query).toHaveBeenCalledTimes(7)
 
     expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(1, {
       query: `
         SELECT DISTINCT locale
-        FROM \`content.locale\`
+        FROM \`search.locale\`
         `,
       location: 'europe-west2',
       params: {},
     })
     expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(2, {
       query: `
-        SELECT name
+        SELECT DISTINCT name
         FROM \`search.taxon\`
         `,
       location: 'europe-west2',
@@ -109,7 +118,23 @@ describe('[Function] sendInitQuery', () => {
     expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(3, {
       query: `
         SELECT DISTINCT title
-        FROM \`graph.organisation\`
+        FROM \`search.organisation\`
+        `,
+      location: 'europe-west2',
+      params: {},
+    })
+    expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(4, {
+      query: `
+        SELECT DISTINCT document_type
+        FROM \`search.document_type\`
+        `,
+      location: 'europe-west2',
+      params: {},
+    })
+    expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(5, {
+      query: `
+        SELECT DISTINCT title
+        FROM \`search.government\`
         `,
       location: 'europe-west2',
       params: {},
@@ -120,6 +145,9 @@ describe('[Function] sendInitQuery', () => {
       taxons: ['taxon1', 'taxon2', 'taxon3'],
       organisations: ['org1', 'org2', 'org3'],
       documentTypes: ['dt1', 'dt2', 'dt3'],
+      governments: ['gov1', 'gov2', 'gov3'],
+      publishingApps: ['app`', 'app2', 'app3'],
+      persons: ['Mr Something'],
     })
   })
 })
@@ -137,9 +165,11 @@ describe('[Function] sendSearchQuery', () => {
       linkSearchUrl: 'link',
       keywordLocation: KeywordLocation.All,
       combinator: Combinator.Any,
-      publishingApplication: PublishingApplication.Any,
+      publishingApp: '',
       caseSensitive: false,
       publishingStatus: PublishingStatus.All,
+      politicalStatus: PoliticalStatus.Any,
+      government: '',
       ...options,
     } as SearchParams)
 
@@ -149,29 +179,20 @@ describe('[Function] sendSearchQuery', () => {
       .mockResolvedValueOnce(['Some result'])
       .mockResolvedValueOnce(['Some result'])
     await sendSearchQuery(makeSearchParams())
-    expect(BigQuery.prototype.query).toHaveBeenCalledTimes(2)
+    expect(BigQuery.prototype.query).toHaveBeenCalledTimes(1)
     expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(1, {
       query: 'query',
       location: 'europe-west2',
       params: {
         excluded_keyword0: 'excluded1',
         excluded_keyword1: 'excluded2',
+        politicalStatus: 'any',
         keyword0: 'keyword1',
         keyword1: 'keyword2',
         link: 'link',
         locale: 'en',
         organisation: 'organisation',
         taxon: 'taxon',
-      },
-    })
-    expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(2, {
-      query: `SELECT *
-         FROM search.thing
-         WHERE CONTAINS_SUBSTR(name, @selected_words_without_quotes)
-         ;`,
-      location: 'europe-west2',
-      params: {
-        selected_words_without_quotes: 'keyword1 keyword2',
       },
     })
   })
@@ -181,13 +202,14 @@ describe('[Function] sendSearchQuery', () => {
       .mockResolvedValueOnce(['Some result'])
       .mockResolvedValueOnce(['Some result'])
     await sendSearchQuery(makeSearchParams({ searchType: SearchType.Taxon }))
-    expect(BigQuery.prototype.query).toHaveBeenCalledTimes(2)
+    expect(BigQuery.prototype.query).toHaveBeenCalledTimes(1)
     expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(1, {
       query: 'query',
       location: 'europe-west2',
       params: {
         excluded_keyword0: 'excluded1',
         excluded_keyword1: 'excluded2',
+        politicalStatus: 'any',
         keyword0: 'keyword1',
         keyword1: 'keyword2',
         link: 'link',
@@ -195,11 +217,6 @@ describe('[Function] sendSearchQuery', () => {
         organisation: 'organisation',
         taxon: 'taxon',
       },
-    })
-    expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(2, {
-      query: `SELECT "Taxon" as type, * FROM search.taxon WHERE lower(name) = lower(@name);`,
-      location: 'europe-west2',
-      params: { name: 'taxon' },
     })
   })
   it('Calls the appropriate queries with Organisation search type', async () => {
@@ -210,13 +227,14 @@ describe('[Function] sendSearchQuery', () => {
     await sendSearchQuery(
       makeSearchParams({ searchType: SearchType.Organisation })
     )
-    expect(BigQuery.prototype.query).toHaveBeenCalledTimes(2)
+    expect(BigQuery.prototype.query).toHaveBeenCalledTimes(1)
     expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(1, {
       query: 'query',
       location: 'europe-west2',
       params: {
         excluded_keyword0: 'excluded1',
         excluded_keyword1: 'excluded2',
+        politicalStatus: 'any',
         keyword0: 'keyword1',
         keyword1: 'keyword2',
         link: 'link',
@@ -224,11 +242,6 @@ describe('[Function] sendSearchQuery', () => {
         organisation: 'organisation',
         taxon: 'taxon',
       },
-    })
-    expect(BigQuery.prototype.query).toHaveBeenNthCalledWith(2, {
-      query: `SELECT "Organisation" as type, * FROM search.organisation WHERE lower(name) = lower(@name);`,
-      location: 'europe-west2',
-      params: { name: 'organisation' },
     })
   })
 })

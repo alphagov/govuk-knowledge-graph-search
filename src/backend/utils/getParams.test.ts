@@ -24,6 +24,8 @@ describe('getParams', () => {
         'document-type': 'some document-type',
         'phone-number': 'some phone-number',
         'publishing-status': 'some publishing-status',
+        'political-status': 'political',
+        government: 'some government',
       },
     } as unknown as Request
 
@@ -39,9 +41,13 @@ describe('getParams', () => {
       keywordLocation: 'some keyword-location',
       linkSearchUrl: 'some link-search-url',
       phoneNumber: 'some phone-number',
-      publishingApplication: 'some publishing-application',
+      publishingApp: 'some publishing-application',
       publishingStatus: 'some publishing-status',
       language: 'some language',
+      politicalStatus: 'political',
+      government: 'some government',
+      linksExactMatch: false,
+      associatedPerson: '',
     })
   })
 
@@ -61,11 +67,15 @@ describe('getParams', () => {
         'link-search-url': '',
         'document-type': '',
         'publishing-status': '',
+        'is-political': '',
+        government: '',
+        'associated-person': '',
       },
     } as unknown as Request
+    console.log({ 'getParams(req)': getParams(req) })
 
     expect(getParams(req)).toStrictEqual({
-      publishingApplication: 'any',
+      publishingApp: '',
       caseSensitive: true,
       combinator: 'all',
       excludedWords: '',
@@ -79,6 +89,10 @@ describe('getParams', () => {
       selectedWords: '',
       keywordLocation: 'all',
       documentType: '',
+      politicalStatus: 'any',
+      government: '',
+      linksExactMatch: false,
+      associatedPerson: '',
     })
   })
 })

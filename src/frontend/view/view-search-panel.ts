@@ -1,11 +1,12 @@
 import { sanitiseOutput } from '../../common/utils/utils'
 import { state } from '../state'
 import { languageName } from '../../common/utils/lang'
+import { formatPublishingApp } from '../utils/formatters'
 import {
   Combinator,
   KeywordLocation,
-  PublishingApplication,
   PublishingStatus,
+  PoliticalStatus,
   SearchType,
 } from '../../common/types/search-api-types'
 
@@ -20,6 +21,7 @@ const viewSearchPanel = () => {
     [SearchType.Language]: viewLanguageSearchPanel,
     [SearchType.Advanced]: viewAdvancedSearchPanel,
     [SearchType.Results]: viewAdvancedSearchPanel,
+    [SearchType.Person]: viewPersonSearchPanel,
   }
 
   if (!(searchType in mapping)) {
@@ -58,6 +60,8 @@ const viewKeywordSearchPanel = () => `
                   ${viewTaxonSelector()}
                   ${viewPublishingStatusSelector()}
                   ${viewLanguageSelector()}
+                  ${viewPoliticalStatusSelector()}
+                  ${viewGovernmentSelector()}
                 </div>
               </div>
             </div>
@@ -89,6 +93,9 @@ export const viewAdvancedSearchPanel = (onTheSide = true) => {
           ${viewTaxonSelector()}
           ${viewPublishingStatusSelector()}
           ${viewLanguageSelector()}
+          ${viewPersonSelector()}
+          ${viewPoliticalStatusSelector()}
+          ${viewGovernmentSelector()}
           ${viewSearchButton()}
         </div>
       </form>
@@ -108,21 +115,24 @@ const viewLinkSearchPanel = () => `
             ? ''
             : `<details class="govuk-details" data-module="govuk-details">
           <summary class="govuk-details__summary">
-            <span class="govuk-details__summary-text">
-              Search filters
-            </span>
+          <span class="govuk-details__summary-text">
+          Search filters
+          </span>
           </summary>
           <div class="govuk-details__text">
-            <div class="search-filters-container">
-              <div class="search-filters-left-col links-search">
-              ${viewPublishingOrganisation()}
-              ${viewPublishingAppSelector()}
-              ${viewDocumentType()}
+          <div class="search-filters-container">
+          <div class="search-filters-left-col links-search">
+          ${viewLinksExactMatchSelector()}
+          ${viewPublishingOrganisation()}
+          ${viewPublishingAppSelector()}
+          ${viewDocumentType()}
               </div>
               <div class="search-filters-right-col links-search">
                 ${viewTaxonSelector()}
                 ${viewPublishingStatusSelector()}
                 ${viewLanguageSelector()}
+                ${viewPoliticalStatusSelector()}
+                ${viewGovernmentSelector()}
               </div>
             </div>
           </div>
@@ -157,6 +167,8 @@ const viewPhoneNumberSearchPanel = () => `
                 ${viewTaxonSelector()}
                 ${viewPublishingStatusSelector()}
                 ${viewLanguageSelector()}
+                ${viewPoliticalStatusSelector()}
+                ${viewGovernmentSelector()}
               </div>
             </div>
           </div>
@@ -190,6 +202,43 @@ const viewTaxonSearchPanel = () => `
                 <div class="search-filters-right-col taxon-search">
                   ${viewDocumentType()}
                   ${viewPublishingAppSelector()}
+                  ${viewPoliticalStatusSelector()}
+                  ${viewGovernmentSelector()}
+                </div>
+              </div>
+            </div>
+          </details>`
+          }
+          ${viewSearchButton()}
+        </div>
+      </form>
+    `
+
+const viewPersonSearchPanel = () => `
+      <form id="search-form" class="search-panel govuk-form">
+        <div class="search-mode-panel">
+          ${viewPersonSelector()}
+          ${
+            state.searchResults
+              ? ''
+              : `<details class="govuk-details" data-module="govuk-details">
+            <summary class="govuk-details__summary">
+              <span class="govuk-details__summary-text">
+                Search filters
+              </span>
+            </summary>
+            <div class="govuk-details__text">
+              <div class="search-filters-container">
+                <div class="search-filters-left-col taxon-search">
+                  ${viewPublishingOrganisation()}
+                  ${viewPublishingStatusSelector()}
+                  ${viewLanguageSelector()}
+                </div>
+                <div class="search-filters-right-col taxon-search">
+                  ${viewDocumentType()}
+                  ${viewPublishingAppSelector()}
+                  ${viewPoliticalStatusSelector()}
+                  ${viewGovernmentSelector()}
                 </div>
               </div>
             </div>
@@ -223,6 +272,8 @@ const viewLanguageSearchPanel = () => `
                 <div class="search-filters-right-col language-search">
                   ${viewTaxonSelector()}
                   ${viewPublishingStatusSelector()}
+                  ${viewPoliticalStatusSelector()}
+                  ${viewGovernmentSelector()}
                 </div>
               </div>
             </div>
@@ -256,6 +307,8 @@ const viewOrganisationSearchPanel = () => `
                 <div class="search-filters-right-col organisation-search">
                   ${viewTaxonSelector()}
                   ${viewLanguageSelector()}
+                  ${viewPoliticalStatusSelector()}
+                  ${viewGovernmentSelector()}
                 </div>
               </div>
             </div>
@@ -386,6 +439,36 @@ const viewDocumentType = () => {
   return html.join('')
 }
 
+const viewGovernmentSelector = () => {
+  const html = [
+    `
+    <div class="govuk-form-group" data-state="${state.waiting && 'disabled'}">
+      <label class="govuk-label govuk-label--s" for="search-filters-government">
+        Government
+      </label>
+      <select ${
+        state.waiting && 'disabled="disabled"'
+      } id="search-filters-government" class="autocomplete__input autocomplete__input--default" name="search-filters-government">
+      <option value="" ></option>
+  `,
+  ]
+
+  html.push(`
+      ${html.push(
+        ...state.governments
+          .sort()
+          .map(
+            (government) =>
+              `<option value="${government}" ${
+                state.searchParams.government === government ? 'selected' : ''
+              }>${government}</option>`
+          )
+      )}
+        </select>
+    </div>`)
+  return html.join('')
+}
+
 const viewTaxonSelector = () => `
     <div class="govuk-form-group" data-state="${state.waiting && 'disabled'}">
       <label class="govuk-label govuk-label--s" for="search-filters-taxon">
@@ -402,6 +485,27 @@ const viewTaxonSelector = () => `
             `<option value="${taxon}" ${
               state.searchParams.taxon === taxon ? 'selected' : ''
             }>${taxon}</option>`
+        )
+        .join('')}
+        </select>
+    </div>`
+
+const viewPersonSelector = () => `
+    <div class="govuk-form-group" data-state="${state.waiting && 'disabled'}">
+      <label class="govuk-label govuk-label--s" for="search-filters-person">
+       Search for pages associated with a person 
+      </label>
+      <select ${
+        state.waiting && 'disabled="disabled"'
+      } id="search-filters-person" class="autocomplete__input autocomplete__input--default" name="search-filters-person">
+      <option value=""></option>
+      ${[...new Set(state.persons)]
+        .sort()
+        .map(
+          (person) =>
+            `<option value="${person}" ${
+              state.searchParams.associatedPerson === person ? 'selected' : ''
+            }>${person}</option>`
         )
         .join('')}
         </select>
@@ -569,6 +673,24 @@ const viewCaseSensitiveSelector = () => `
 </div>
 `
 
+const viewLinksExactMatchSelector = () => `
+<div class="govuk-form-group">
+  <div class="govuk-checkboxes govuk-checkboxes--small">
+    <div class="govuk-checkboxes__item">
+      <input
+          class="govuk-checkboxes__input"
+          ${state.waiting && 'disabled="disabled"'}
+          type="checkbox"
+          id="search-filters-links-exact-match"
+          name="search-filters-links-exact-match"
+          ${state.searchParams.linksExactMatch ? 'checked' : ''}
+      />
+      <label for="search-filters-links-exact-match" class="govuk-label govuk-checkboxes__label">Exact matches only</label>
+    </div>
+  </div>
+</div>
+`
+
 const viewKeywordsCombinator = (withNegativeMargin = false) => `
 <div class="govuk-form-group" ${
   withNegativeMargin ? `style="margin-top: -30px;"` : ''
@@ -613,21 +735,43 @@ const viewPublishingAppSelector = () => `
         <select ${
           state.waiting && 'disabled="disabled"'
         } id="search-filters-publishing-application" class="govuk-select" name="search-filters-publishing-application" style="width: 100%;">
-          <option value="${PublishingApplication.Any}" ${
-  state.searchParams.publishingApplication === PublishingApplication.Any
+        <option value="" ${
+          state.searchParams.publishingApp === '' ? 'selected' : ''
+        }>Any</option>
+        ${state.publishingApps
+          .sort()
+          .map(
+            (publishingApp) =>
+              `<option value="${publishingApp}" ${
+                state.searchParams.publishingApp === publishingApp
+                  ? 'selected'
+                  : ''
+              }>${formatPublishingApp(publishingApp)}</option>`
+          )}
+        </select>
+    </div>`
+
+const viewPoliticalStatusSelector = () => `
+      <div class="govuk-form-group" data-state="${state.waiting && 'disabled'}">
+        <label class="govuk-label govuk-label--s" for="search-filters-political-status">
+          Political status
+        </label>
+        <select ${
+          state.waiting && 'disabled="disabled"'
+        } id="search-filters-political-status" class="govuk-select" name="search-filters-political-status" style="width: 100%;">
+          <option value="${PoliticalStatus.Any}" ${
+  state.searchParams.politicalStatus === PoliticalStatus.Any ? 'selected' : ''
+}>Any</option>
+          <option value="${PoliticalStatus.Political}" ${
+  state.searchParams.politicalStatus === PoliticalStatus.Political
     ? 'selected'
     : ''
-}>All publishing applications</option>
-          <option value="${PublishingApplication.Publisher}" ${
-  state.searchParams.publishingApplication === PublishingApplication.Publisher
+}>Political</option>
+          <option value="${PoliticalStatus.NotPolitical}" ${
+  state.searchParams.politicalStatus === PoliticalStatus.NotPolitical
     ? 'selected'
     : ''
-}>Publisher (mainstream)</option>
-          <option value="${PublishingApplication.Whitehall}" ${
-  state.searchParams.publishingApplication === PublishingApplication.Whitehall
-    ? 'selected'
-    : ''
-}>Whitehall (specialist)</option>
+}>Not political</option>
         </select>
     </div>`
 
