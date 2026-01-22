@@ -27,6 +27,11 @@ module.exports = (env) => ({
           },
           {
             loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                quietDeps: true,
+              },
+            },
           },
         ],
       },
