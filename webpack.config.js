@@ -27,6 +27,11 @@ module.exports = (env) => ({
           },
           {
             loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                quietDeps: true,
+              },
+            },
           },
         ],
       },
@@ -36,14 +41,14 @@ module.exports = (env) => ({
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: '[name].js',
+    filename: 'javascripts/[name].js',
     path: path.resolve(__dirname, 'public'),
   },
   plugins: [
     env?.enableHMR
       ? new webpack.HotModuleReplacementPlugin()
       : new MiniCssExtractPlugin({
-          filename: '[name].css',
+          filename: 'stylesheets/[name].css',
         }),
     new webpack.DefinePlugin({
       buildConfig: {

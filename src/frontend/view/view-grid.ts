@@ -75,9 +75,31 @@ const createAgGrid = () => {
     ...(sortConfig[field] || {}),
   }))
 
+  const suppressKeyboardEvent = (
+    params: SuppressKeyboardEventParams
+  ): boolean => {
+    return params.event.key.toUpperCase() === 'TAB'
+  }
+
+  const suppressHeaderKeyboardEvent = (params): boolean => {
+    const colNames = gridOptions.columnApi
+      .getAllDisplayedColumns()
+      .map((col) => col.colId)
+    const lastCol = colNames[colNames.length - 1]
+
+    return (
+      params.event.key.toUpperCase() === 'TAB' &&
+      params.column.getId() === lastCol
+    )
+  }
+
   const gridOptions = {
     rowData,
     columnDefs,
+    defaultColDef: {
+      suppressKeyboardEvent,
+      suppressHeaderKeyboardEvent,
+    },
     onPaginationChanged: function () {
       viewPagination(gridOptions)
     },

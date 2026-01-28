@@ -40,7 +40,7 @@ const viewKeywordSearchPanel = () => `
             state.searchResults
               ? ''
               : `<details class="govuk-details" data-module="govuk-details">
-            <summary class="govuk-details__summary">
+            <summary class="govuk-details__summary" role="button">
               <span class="govuk-details__summary-text">
                 Search filters
               </span>
@@ -114,10 +114,10 @@ const viewLinkSearchPanel = () => `
           state.searchResults
             ? ''
             : `<details class="govuk-details" data-module="govuk-details">
-          <summary class="govuk-details__summary">
-          <span class="govuk-details__summary-text">
-          Search filters
-          </span>
+          <summary class="govuk-details__summary" role="button">
+            <span class="govuk-details__summary-text">
+              Search filters
+            </span>
           </summary>
           <div class="govuk-details__text">
           <div class="search-filters-container">
@@ -187,7 +187,7 @@ const viewTaxonSearchPanel = () => `
             state.searchResults
               ? ''
               : `<details class="govuk-details" data-module="govuk-details">
-            <summary class="govuk-details__summary">
+            <summary class="govuk-details__summary" role="button">
               <span class="govuk-details__summary-text">
                 Search filters
               </span>
@@ -222,7 +222,7 @@ const viewPersonSearchPanel = () => `
             state.searchResults
               ? ''
               : `<details class="govuk-details" data-module="govuk-details">
-            <summary class="govuk-details__summary">
+            <summary class="govuk-details__summary" role="button">
               <span class="govuk-details__summary-text">
                 Search filters
               </span>
@@ -237,8 +237,6 @@ const viewPersonSearchPanel = () => `
                 <div class="search-filters-right-col taxon-search">
                   ${viewDocumentType()}
                   ${viewPublishingAppSelector()}
-                  ${viewPoliticalStatusSelector()}
-                  ${viewGovernmentSelector()}
                 </div>
               </div>
             </div>
@@ -257,7 +255,7 @@ const viewLanguageSearchPanel = () => `
             state.searchResults
               ? ''
               : `<details class="govuk-details" data-module="govuk-details">
-            <summary class="govuk-details__summary">
+            <summary class="govuk-details__summary" role="button">
               <span class="govuk-details__summary-text">
                 Search filters
               </span>
@@ -292,7 +290,7 @@ const viewOrganisationSearchPanel = () => `
             state.searchResults
               ? ''
               : `<details class="govuk-details" data-module="govuk-details">
-            <summary class="govuk-details__summary">
+            <summary class="govuk-details__summary" role="button">
               <span class="govuk-details__summary-text">
                 Search filters
               </span>
