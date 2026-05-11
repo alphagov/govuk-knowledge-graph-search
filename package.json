@@ -48,7 +48,7 @@
     "csv-stringify": "^6.2.4",
     "dotenv": "^16.4.5",
     "express": "^4.22.1",
-    "express-rate-limit": "^8.0.2",
+    "express-rate-limit": "^8.5.1",
     "express-session": "^1.18.2",
     "google-libphonenumber": "^3.2.33",
     "got": "^12.5.0",
