@@ -4,9 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - production
-    types:
-      - closed
+      - main
 
 jobs:
   create-tag:
