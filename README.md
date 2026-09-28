@@ -108,12 +108,10 @@ You can also trigger the workflow manually in the actions tab of the repo, by se
 
 Production deployments have to be triggered manually for security reasons.
 
-1. After testing the changes in the staging environment, create a PR of the main branch against the production branch.
-2. Review and approve the PR.
-3. Merge the PR.
-4. Wait for completion of the `create-release-tag` GitHub Action. It will create a new release and a tag in the GitHub repository for every production deployment.
-5. Once the release appears in the repository, manually run the production-deploy workflow. Select the `latest` tag from the `production` branch.
-6. (Optional) Write a custom description for the release in Github.
+1. Testing the changes in the staging environment. This will have been deployed on push to `main`.
+2. The `create-release-tag` GitHub Action will have created a new release and a tag for the most recent push to `main` .
+3. Once the release appears in the repository, manually run the production-deploy workflow. Select the `latest` tag from the `main` branch.
+4. (Optional) Write a custom description for the release in Github.
 
 ### Please note:
 
@@ -122,6 +120,8 @@ Production deployments have to be triggered manually for security reasons.
 - There may be a slight delay (usually less than a minute) before the new release appears in the repository after the create-release-tag action has completed.
 
 ## Deployment Steps
+
+:information_source: These steps do not appear to be required unless it is a brand new deployment or the GA4 property has changed.
 
 1. Go to production site https://gov-search.service.gov.uk/ and view the source.
 2. Look for the line beginning `<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?` and note the values of the URL parameters `id` and `gtm_auth`. They look like `GTM-XXXXXXX` and `aWEg5ABBXXXXXXXXXXXXXXXXX`.
@@ -132,7 +132,7 @@ Production deployments have to be triggered manually for security reasons.
 7. Choose the GCP region `europe-west2`
 8. Continue. Check in the [web console](https://console.cloud.google.com/run/detail/europe-west2/govuk-knowledge-graph-search/revisions?project=govuk-knowledge-graph) that a revision was deployed, and try using it at https://govgraphsearch.dev.
 
-## Logging
+## Logging
 
 We use Pino for logging.
 Pino enables structured logging, human-readable formatting, top-notch performance.
