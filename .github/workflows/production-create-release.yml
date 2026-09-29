@@ -2,11 +2,9 @@ name: Create Release Tag
 
 on:
   workflow_dispatch:
-  pull_request:
+  push:
     branches:
-      - production
-    types:
-      - closed
+      - main
 
 jobs:
   create-tag:
