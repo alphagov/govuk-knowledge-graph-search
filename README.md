@@ -106,18 +106,12 @@ You can also trigger the workflow manually in the actions tab of the repo, by se
 
 ### Production Deployment
 
-Production deployments have to be triggered manually for security reasons.
-
-1. Testing the changes in the staging environment. This will have been deployed on push to `main`.
-2. The `create-release-tag` GitHub Action will have created a new release and a tag for the most recent push to `main` .
-3. Once the release appears in the repository, manually run the production-deploy workflow. Select the `latest` tag from the `main` branch.
-4. (Optional) Write a custom description for the release in Github.
+1. Test the changes in the staging environment. This will have been deployed on push to `main`.
+2. If you are happy with the changes, ask someone in the [govuk-data-engineering](https://github.com/orgs/alphagov/teams/govuk-data-engineering) team to approve the release to production.
 
 ### Please note:
 
 - Deployments from local machine should be limited to the development environment.
-- The deploy-staging GitHub Action will run again during the PR from main to production. This is expected and won't cause issues.
-- There may be a slight delay (usually less than a minute) before the new release appears in the repository after the create-release-tag action has completed.
 
 ## Deployment Steps
 
