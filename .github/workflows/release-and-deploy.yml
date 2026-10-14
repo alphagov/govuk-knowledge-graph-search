@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release_tag: ${{ steps.tag_gen.outputs.tag }}
+      short_sha: ${{ steps.tag_gen.outputs.short_sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,8 +31,10 @@ jobs:
       - name: Generate Release Tag Name
         id: tag_gen
         run: |
-          TAG=$(date +v%Y.%m.%d)-$(git rev-parse --short HEAD)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          TAG=$(date +v%Y.%m.%d)-${SHORT_SHA}
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         env:
@@ -67,14 +70,14 @@ jobs:
           gcloud run deploy govuk-knowledge-graph-search \
             --source . \
             --region "europe-west2" \
-            --tag "${{ needs.create-release.outputs.release_tag }}" \
+            --tag "main-${{ needs.create-release.outputs.short_sha }}" \
             --no-traffic \
             --project ${{ vars.GCP_PROJECT_ID }}
 
       - name: Route Traffic to New Revision
         run: |
           gcloud run services update-traffic govuk-knowledge-graph-search \
-            --to-tags "${{ needs.create-release.outputs.release_tag }}=100" \
+            --to-tags "main-${{ needs.create-release.outputs.short_sha }}=100" \
             --region "europe-west2" \
             --project ${{ vars.GCP_PROJECT_ID }}
 
@@ -105,13 +108,13 @@ jobs:
           gcloud run deploy govuk-knowledge-graph-search \
             --source . \
             --region "europe-west2" \
-            --tag "${{ needs.create-release.outputs.release_tag }}" \
+            --tag "main-${{ needs.create-release.outputs.short_sha }}" \
             --no-traffic \
             --project ${{ vars.GCP_PROJECT_ID }}
 
       - name: Route Traffic to New Revision
         run: |
           gcloud run services update-traffic govuk-knowledge-graph-search \
-            --to-tags "${{ needs.create-release.outputs.release_tag }}=100" \
+            --to-tags "main-${{ needs.create-release.outputs.short_sha }}=100" \
             --region "europe-west2" \
             --project ${{ vars.GCP_PROJECT_ID }}
