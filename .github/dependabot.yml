@@ -45,3 +45,7 @@ updates:
     cooldown:
       default-days: 10
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: 'node'
+        # Ignore non-LTS major versions
+        versions: ['25.x', '27.x', '29.x']
