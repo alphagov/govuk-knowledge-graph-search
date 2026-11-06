@@ -73,7 +73,7 @@
     "@types/jest": "^29.5.2",
     "@types/nunjucks": "^3.2.2",
     "@types/passport-oauth2": "^1.4.12",
-    "@types/supertest": "^2.0.12",
+    "@types/supertest": "^7.2.1",
     "@types/webpack-hot-middleware": "^2.25.6",
     "css-loader": "^7.1.5",
     "cypress": "^15.16.0",
