@@ -42,7 +42,7 @@
     "accessible-autocomplete": "^2.0.4",
     "axios": "^1.21.0",
     "ci": "^2.3.0",
-    "connect-redis": "^7.1.0",
+    "connect-redis": "^10.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "csv-stringify": "^6.2.4",
